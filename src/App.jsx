@@ -1,34 +1,66 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
+import { useState, useEffect } from 'react'
+import { supabase } from './lib/supabase'
+import Auth from './pages/Auth'
+import Dashboard from './pages/Dashboard'
+import Leaderboard from './pages/Leaderboard'
 import './App.css'
 
 function App() {
-  const [count, setCount] = useState(0)
+  const [user, setUser] = useState(null)
+  const [loading, setLoading] = useState(true)
+  const [activePage, setActivePage] = useState('dashboard')
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setUser(session?.user ?? null)
+      setLoading(false)
+    })
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null)
+    })
+
+    return () => subscription.unsubscribe()
+  }, [])
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut()
+  }
+
+  if (loading) return <div className="loading-screen">Se încarcă...</div>
+  if (!user) return <Auth />
 
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
+    <div className="app">
+      <aside className="sidebar">
+        <div className="sidebar-logo">
+          <span>⚡</span>
+          <span className="sidebar-logo-text">Strivo</span>
+        </div>
+        <nav className="sidebar-nav">
+          <button
+            className={`nav-item ${activePage === 'dashboard' ? 'active' : ''}`}
+            onClick={() => setActivePage('dashboard')}
+          >
+            <span>⚡</span> Dashboard
+          </button>
+          <button
+            className={`nav-item ${activePage === 'leaderboard' ? 'active' : ''}`}
+            onClick={() => setActivePage('leaderboard')}
+          >
+            <span>🏆</span> Leaderboard
+          </button>
+        </nav>
+        <button className="logout-btn" onClick={handleLogout}>
+          Deconectare
         </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
+      </aside>
+
+      <main className="main-content">
+        {activePage === 'dashboard' && <Dashboard user={user} />}
+        {activePage === 'leaderboard' && <Leaderboard user={user} />}
+      </main>
+    </div>
   )
 }
 
