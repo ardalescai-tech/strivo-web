@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react'
 import { supabase } from './lib/supabase'
 import Auth from './pages/Auth'
 import Dashboard from './pages/Dashboard'
+import Statistics from './pages/Statistics'
+import History from './pages/History'
 import Leaderboard from './pages/Leaderboard'
 import './App.css'
 
@@ -45,6 +47,18 @@ function App() {
             <span>⚡</span> Dashboard
           </button>
           <button
+            className={`nav-item ${activePage === 'statistics' ? 'active' : ''}`}
+            onClick={() => setActivePage('statistics')}
+          >
+            <span>📊</span> Statistics
+          </button>
+          <button
+            className={`nav-item ${activePage === 'history' ? 'active' : ''}`}
+            onClick={() => setActivePage('history')}
+          >
+            <span>📅</span> History
+          </button>
+          <button
             className={`nav-item ${activePage === 'leaderboard' ? 'active' : ''}`}
             onClick={() => setActivePage('leaderboard')}
           >
@@ -58,6 +72,8 @@ function App() {
 
       <main className="main-content">
         {activePage === 'dashboard' && <Dashboard user={user} />}
+        {activePage === 'statistics' && <Statistics user={user} />}
+        {activePage === 'history' && <History user={user} />}
         {activePage === 'leaderboard' && <Leaderboard user={user} />}
       </main>
     </div>
