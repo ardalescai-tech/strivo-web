@@ -202,19 +202,12 @@ function Dashboard({ user }) {
                   <span className="task-label" onDoubleClick={() => startEdit(task)}>{task.label}</span>
                 )}
                 {!task.done && (
-                  <button
-                    className={`task-time-btn ${task.time ? 'has-time' : ''}`}
-                    onClick={() => document.getElementById(`time-${task.id}`).showPicker()}
-                  >
-                    {task.time ? `⏰ ${task.time}` : '⏰'}
-                    <input
-                      type="time"
-                      id={`time-${task.id}`}
-                      className="task-time-hidden"
-                      value={task.time || ''}
-                      onChange={e => updateTime(task.id, e.target.value)}
-                    />
-                  </button>
+                  <input
+                    type="time"
+                    className="task-time-mobile"
+                    value={task.time || ''}
+                    onChange={e => updateTime(task.id, e.target.value)}
+                  />
                 )}
                 {!task.done && (
                   <button className="task-delete" onClick={() => deleteTask(task.id)}>✕</button>

@@ -24,7 +24,6 @@ body {
   min-height: 100vh;
 }
 
-/* MOBILE HEADER - ascuns pe desktop */
 .mobile-header {
   display: none;
 }
@@ -101,6 +100,7 @@ body {
   cursor: pointer;
   transition: all 0.2s;
   width: 100%;
+  margin-top: 16px;
 }
 
 .logout-btn:hover {
@@ -125,13 +125,12 @@ body {
   display: none;
 }
 
-/* MOBILE */
 @media (max-width: 768px) {
   .mobile-header {
     display: flex;
     align-items: center;
     gap: 12px;
-    padding: 16px;
+    padding: 0 16px;
     background: #0f0f0f;
     border-bottom: 1px solid #1a1a1a;
     position: fixed;
@@ -165,7 +164,6 @@ body {
     height: 2px;
     background: #fff;
     border-radius: 2px;
-    transition: all 0.2s;
   }
 
   .sidebar {
@@ -173,6 +171,8 @@ body {
     transition: transform 0.3s ease;
     top: 60px;
     height: calc(100vh - 60px);
+    overflow-y: auto;
+    padding-bottom: 24px;
   }
 
   .sidebar.open {

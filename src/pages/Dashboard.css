@@ -14,6 +14,7 @@
   padding: 24px 32px;
   position: relative;
   overflow: hidden;
+  flex-wrap: wrap;
 }
 
 .streak-banner::before {
@@ -193,7 +194,7 @@
 .task-top {
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 12px;
 }
 
 .task-check {
@@ -238,35 +239,29 @@
   outline: none;
 }
 
-.task-time-btn {
+.task-time-mobile {
   background: transparent;
   border: 1px solid #2a2a2a;
   border-radius: 8px;
-  padding: 6px 12px;
+  padding: 5px 8px;
   color: #666;
-  font-size: 13px;
+  font-size: 12px;
+  outline: none;
   cursor: pointer;
   transition: all 0.2s;
-  position: relative;
+  width: 80px;
+  -webkit-appearance: none;
 }
 
-.task-time-btn:hover {
+.task-time-mobile::-webkit-calendar-picker-indicator {
+  filter: invert(0.5);
+  cursor: pointer;
+}
+
+.task-time-mobile:focus {
   border-color: #4f8ef7;
-  color: #4f8ef7;
-}
-
-.task-time-btn.has-time {
-  border-color: #4f8ef7;
-  color: #4f8ef7;
-  background: #0d1a2e;
-}
-
-.task-time-hidden {
-  position: absolute;
-  opacity: 0;
-  width: 0;
-  height: 0;
-  pointer-events: none;
+  color: #fff;
+  background: #111;
 }
 
 .task-delete {
@@ -278,6 +273,7 @@
   padding: 4px 8px;
   border-radius: 4px;
   transition: color 0.2s;
+  flex-shrink: 0;
 }
 
 .task-delete:hover {
@@ -294,6 +290,7 @@
   color: #aaa;
   font-size: 14px;
   outline: none;
+  box-sizing: border-box;
 }
 
 .task-note:focus {
@@ -331,6 +328,7 @@
   width: 46px;
   cursor: pointer;
   transition: background 0.2s;
+  flex-shrink: 0;
 }
 
 .add-task-btn:hover {
@@ -376,4 +374,27 @@
 
 .startup-message button:hover {
   color: #fff;
+}
+
+@media (max-width: 768px) {
+  .streak-banner {
+    padding: 16px 20px;
+  }
+
+  .streak-fire {
+    font-size: 36px;
+  }
+
+  .streak-count {
+    font-size: 48px;
+  }
+
+  .streak-label {
+    font-size: 16px;
+  }
+
+  .rank-badge {
+    font-size: 13px;
+    padding: 6px 12px;
+  }
 }
