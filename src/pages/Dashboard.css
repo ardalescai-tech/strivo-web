@@ -398,3 +398,17 @@
     padding: 6px 12px;
   }
 }
+
+.drag-handle {
+  cursor: grab;
+  color: #444;
+  font-size: 18px;
+  padding: 0 4px;
+  flex-shrink: 0;
+  touch-action: none;
+}
+
+.drag-handle:active {
+  cursor: grabbing;
+  color: #888;
+}

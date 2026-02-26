@@ -2,6 +2,21 @@ import { useState, useEffect } from 'react'
 import { getDayData, saveDayData, getTodayKey, getYesterdayKey, recalculateStreak } from '../lib/storage'
 import { getRank, getNextRank } from '../data/ranks'
 import { getRandomMessage, messagesZiRatata } from '../data/messages'
+import {
+  DndContext,
+  closestCenter,
+  PointerSensor,
+  TouchSensor,
+  useSensor,
+  useSensors,
+} from '@dnd-kit/core'
+import {
+  arrayMove,
+  SortableContext,
+  useSortable,
+  verticalListSortingStrategy,
+} from '@dnd-kit/sortable'
+import { CSS } from '@dnd-kit/utilities'
 import './Dashboard.css'
 
 const DEFAULT_TASKS = [
@@ -12,6 +27,58 @@ const DEFAULT_TASKS = [
   { id: 5, label: 'Lucrat la Strivo' },
 ]
 
+function SortableTask({ task, toggleTask, updateNote, updateTime, deleteTask, startEdit, editingId, editingLabel, setEditingLabel, saveEdit }) {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: task.id })
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.5 : 1,
+  }
+
+  return (
+    <div ref={setNodeRef} style={style} className={`task-card ${task.done ? 'done' : ''}`}>
+      <div className="task-top">
+        <span className="drag-handle" {...attributes} {...listeners}>⠿</span>
+        <button className={`task-check ${task.done ? 'checked' : ''}`} onClick={() => toggleTask(task.id)}>
+          {task.done ? '✓' : ''}
+        </button>
+        {editingId === task.id ? (
+          <input
+            className="task-edit-input"
+            value={editingLabel}
+            onChange={e => setEditingLabel(e.target.value)}
+            onBlur={() => saveEdit(task.id)}
+            onKeyDown={e => e.key === 'Enter' && saveEdit(task.id)}
+            autoFocus
+          />
+        ) : (
+          <span className="task-label" onDoubleClick={() => startEdit(task)}>{task.label}</span>
+        )}
+        {!task.done && (
+          <input
+            type="time"
+            className="task-time-mobile"
+            value={task.time || ''}
+            onChange={e => updateTime(task.id, e.target.value)}
+          />
+        )}
+        {!task.done && (
+          <button className="task-delete" onClick={() => deleteTask(task.id)}>✕</button>
+        )}
+      </div>
+      {task.done && (
+        <input
+          className="task-note"
+          placeholder="Adaugă o notă..."
+          value={task.note}
+          onChange={e => updateNote(task.id, e.target.value)}
+        />
+      )}
+    </div>
+  )
+}
+
 function Dashboard({ user }) {
   const [tasks, setTasks] = useState([])
   const [streak, setStreak] = useState(0)
@@ -21,6 +88,16 @@ function Dashboard({ user }) {
   const [editingId, setEditingId] = useState(null)
   const [editingLabel, setEditingLabel] = useState('')
   const [startupMessage, setStartupMessage] = useState(null)
+
+  const sensors = useSensors(
+    useSensor(PointerSensor),
+    useSensor(TouchSensor, {
+      activationConstraint: {
+        delay: 250,
+        tolerance: 5,
+      },
+    })
+  )
 
   useEffect(() => {
     if (user) loadData()
@@ -50,6 +127,17 @@ function Dashboard({ user }) {
       if (!yesterdayData.is_rest_day && done < total) {
         setStartupMessage(getRandomMessage(messagesZiRatata))
       }
+    }
+  }
+
+  const handleDragEnd = async (event) => {
+    const { active, over } = event
+    if (active.id !== over?.id) {
+      const oldIndex = tasks.findIndex(t => t.id === active.id)
+      const newIndex = tasks.findIndex(t => t.id === over.id)
+      const updated = arrayMove(tasks, oldIndex, newIndex)
+      setTasks(updated)
+      await saveDay(updated)
     }
   }
 
@@ -182,48 +270,27 @@ function Dashboard({ user }) {
           </button>
         </div>
 
-        <div className="tasks-list">
-          {tasks.map(task => (
-            <div key={task.id} className={`task-card ${task.done ? 'done' : ''}`}>
-              <div className="task-top">
-                <button className={`task-check ${task.done ? 'checked' : ''}`} onClick={() => toggleTask(task.id)}>
-                  {task.done ? '✓' : ''}
-                </button>
-                {editingId === task.id ? (
-                  <input
-                    className="task-edit-input"
-                    value={editingLabel}
-                    onChange={e => setEditingLabel(e.target.value)}
-                    onBlur={() => saveEdit(task.id)}
-                    onKeyDown={e => e.key === 'Enter' && saveEdit(task.id)}
-                    autoFocus
-                  />
-                ) : (
-                  <span className="task-label" onDoubleClick={() => startEdit(task)}>{task.label}</span>
-                )}
-                {!task.done && (
-                  <input
-                    type="time"
-                    className="task-time-mobile"
-                    value={task.time || ''}
-                    onChange={e => updateTime(task.id, e.target.value)}
-                  />
-                )}
-                {!task.done && (
-                  <button className="task-delete" onClick={() => deleteTask(task.id)}>✕</button>
-                )}
-              </div>
-              {task.done && (
-                <input
-                  className="task-note"
-                  placeholder="Adaugă o notă..."
-                  value={task.note}
-                  onChange={e => updateNote(task.id, e.target.value)}
+        <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+          <SortableContext items={tasks.map(t => t.id)} strategy={verticalListSortingStrategy}>
+            <div className="tasks-list">
+              {tasks.map(task => (
+                <SortableTask
+                  key={task.id}
+                  task={task}
+                  toggleTask={toggleTask}
+                  updateNote={updateNote}
+                  updateTime={updateTime}
+                  deleteTask={deleteTask}
+                  startEdit={startEdit}
+                  editingId={editingId}
+                  editingLabel={editingLabel}
+                  setEditingLabel={setEditingLabel}
+                  saveEdit={saveEdit}
                 />
-              )}
+              ))}
             </div>
-          ))}
-        </div>
+          </SortableContext>
+        </DndContext>
 
         <div className="add-task-row">
           <input
