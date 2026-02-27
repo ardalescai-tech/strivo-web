@@ -13,12 +13,7 @@ function Leaderboard({ user }) {
 
   const loadPlayers = async () => {
     const profiles = await getAllProfiles()
-    const sorted = profiles
-      .map(p => ({
-        ...p,
-        streak: p.streaks?.[0]?.current_streak || 0
-      }))
-      .sort((a, b) => b.streak - a.streak)
+    const sorted = profiles.sort((a, b) => b.streak - a.streak)
     setPlayers(sorted)
     setLoading(false)
   }

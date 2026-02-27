@@ -70,5 +70,8 @@ export const getAllProfiles = async () => {
     .from('profiles')
     .select('*, streaks(current_streak)')
   if (error) return []
-  return data
+  return data.map(p => ({
+    ...p,
+    streak: p.streaks?.[0]?.current_streak || 0
+  }))
 }
