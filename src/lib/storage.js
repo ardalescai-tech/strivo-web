@@ -66,12 +66,20 @@ export const recalculateStreak = async (userId) => {
 }
 
 export const getAllProfiles = async () => {
-  const { data, error } = await supabase
+  const { data: profiles, error } = await supabase
     .from('profiles')
-    .select('*, streaks(current_streak)')
+    .select('id, username, created_at')
   if (error) return []
-  return data.map(p => ({
-    ...p,
-    streak: p.streaks?.[0]?.current_streak || 0
-  }))
+
+  const { data: streaks } = await supabase
+    .from('streaks')
+    .select('user_id, current_streak')
+
+  return profiles.map(p => {
+    const streakRow = streaks?.find(s => s.user_id === p.id)
+    return {
+      ...p,
+      streak: streakRow?.current_streak || 0
+    }
+  })
 }
