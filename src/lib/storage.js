@@ -17,7 +17,7 @@ export const getDayData = async (userId, date) => {
     .select('*')
     .eq('user_id', userId)
     .eq('date', date)
-    .single()
+    .maybeSingle()
   if (error) return null
   return data
 }
@@ -34,7 +34,7 @@ export const getStreak = async (userId) => {
     .from('streaks')
     .select('current_streak')
     .eq('user_id', userId)
-    .single()
+    .maybeSingle()
   if (error) return 0
   return data?.current_streak || 0
 }
